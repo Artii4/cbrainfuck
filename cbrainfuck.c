@@ -58,6 +58,10 @@ void vm_execute(struct vm *vm, char *program)
                 if (program[vm->pc] == ']') q--;
                 if (program[vm->pc] == '[') q++;
                 if (q == 0) break;
+				if (program[vm->pc] == '\0') {
+					fprintf(stderr, "Error: No matching ']'.\n");
+					exit(1);
+				}
             }
 
             break;
@@ -68,6 +72,10 @@ void vm_execute(struct vm *vm, char *program)
 
             int q = 1;
             for (;;) {
+				if (vm->pc == 0) {
+					fprintf(stderr, "Error: no matching '['\n");
+					exit(1);
+				}
                 vm->pc--;
                 if (program[vm->pc] == '[') q--;
                 if (program[vm->pc] == ']') q++;
@@ -124,20 +132,20 @@ void test()
 int main(int argc, const char **argv)
 {
 	if (argc != 2) {
-		printf("Usage: cbrainfuck [file]\n");
+		fprintf(stderr, "Usage: cbrainfuck [file]\n");
 		exit(1);
 	}
 
 	FILE *program = fopen(argv[1], "r");
 	if (program == NULL) {
-		printf("Error with reading file :(\n");
+		fprintf(stderr, "Error with reading file :(\n");
 		exit(1);
 	}
 
 	char buf[MAXBUFSIZE + 1];
 	fread(buf, 1, MAXBUFSIZE, program);
 
-	struct vm vm = vm_create(1000);
+	struct vm vm = vm_create(100000);
 	vm_execute(&vm, buf);
 	vm_destroy(&vm);
 
